@@ -8,6 +8,7 @@ Features
 - **Custom ROS 2 Messages:** Strongly-typed `VehicleState` and `VehicleControl` interfaces.
 - 
 ##  Project Structure
+```text
 vehicle_control/
 ├── CMakeLists.txt          # Build configuration
 ├── package.xml             # Dependencies
