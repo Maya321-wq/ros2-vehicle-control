@@ -1,36 +1,13 @@
-
-
-A modular, event-driven autonomous vehicle control framework built with ROS 2 (C++ and Python). This project demonstrates longitudinal/lateral control, state machines, and real-time visualization.
-
-##  Project Structure
-```text
-vehicle_control/
-├── CMakeLists.txt          # Build configuration
-├── package.xml             # Dependencies
-├── msg/                    # Custom ROS 2 messages
-│   ├── VehicleState.msg
-│   └── VehicleControl.msg
-── src/                    # C++ Nodes
-│   ├── vehicle_simulator.cpp           # Physics engine
-│   ├── speed_controller.cpp            # Basic P-Controller
-│   ├── scenario_controller.cpp         # Time-based
-
 # ROS 2 Autonomous Vehicle Control System
 
-# ✨ Features
-- **Custom Physics Simulator:** Simulates vehicle kinematics (speed, position, yaw).
-- **Modular Controllers:** Basic P-Controller, Time-Based State Machine, and Event-Driven Controller.
-- **Event-Driven Logic:** Reacts to traffic lights and emergency obstacle detection.
-- **Real-Time Visualization:** 2D Matplotlib path tracking and 3D RViz2 markers.
-- **Custom ROS 2 Messages:** Strongly-typed `VehicleState` and `VehicleControl` interfaces.
 Features
 - **Custom Physics Simulator:** Simulates vehicle kinematics (speed, position, yaw).
 - **Modular Controllers:** Basic P-Controller, Time-Based State Machine, and Event-Driven Controller.
 - **Event-Driven Logic:** Reacts to traffic lights and emergency obstacle detection.
 - **Real-Time Visualization:** 2D Matplotlib path tracking and 3D RViz2 markers.
 - **Custom ROS 2 Messages:** Strongly-typed `VehicleState` and `VehicleControl` interfaces.
-## 📂 Project Structure
-```text
+- 
+##  Project Structure
 vehicle_control/
 ├── CMakeLists.txt          # Build configuration
 ├── package.xml             # Dependencies
@@ -49,23 +26,28 @@ vehicle_control/
       |__ vehicle_control.launch.py
       |__ advanced_scenario.launch.py 
 
-Steps to Run
+Steps to Run:
+
 Prerequisites
 ROS 2 installed on Ubuntu/WSL2.
 Python 3 with matplotlib installed (sudo apt install python3-matplotlib).
+
 Step 1: Clone and Build
 Open your terminal, navigate to your ROS 2 workspace, and build the package: 
 cd ~/ros2_ws
 colcon build --packages-select vehicle_control
 source install/setup.bash
+
 Step 2: Run the Simulation & Controller
 Launch the vehicle simulator and the advanced event-driven controller:
 ros2 launch vehicle_control advanced_scenario.launch.py
+
 Step 3: Run the 2D Visualizer
 Open a second terminal, source your workspace, and run the Python visualizer:
 cd ~/ros2_ws
 source install/setup.bash
 python3 src/vehicle_control/scripts/plot_path.py
+
 Step 4: Test the Scenarios
 Open a third terminal to inject external events and watch how the controller and visualizer react:
 1. Simulate a Red Traffic Light (Vehicle will brake to a stop):
