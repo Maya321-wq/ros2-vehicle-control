@@ -7,7 +7,7 @@ class PathPlotter(Node):
     def __init__(self):
         super().__init__('path_plotter')
         self.subscription = self.create_subscription(
-            VehicleState, '/vehicle_state', self.state_callback, 10)
+            VehicleState, 'vehicle_state', self.state_callback, 10)
         
         self.x_data = []
         self.y_data = []

@@ -4,6 +4,7 @@
 #include <memory>
 
 #include "rclcpp/rclcpp.hpp"
+#include "vehicle_control/topics.hpp"
 #include "vehicle_control/msg/vehicle_state.hpp"
 #include "vehicle_control/msg/vehicle_control.hpp"
 
@@ -35,13 +36,13 @@ public:
         // Subscribe to vehicle state
         state_subscription_ =
             this->create_subscription<vehicle_control::msg::VehicleState>(
-                "/vehicle_state", 10,
+                vehicle_control::topics::kVehicleState, 10,
                 std::bind(&ScenarioController::state_callback, this, _1));
 
         // Publish control commands
         control_publisher_ =
             this->create_publisher<vehicle_control::msg::VehicleControl>(
-                "/vehicle_control", 10);
+                vehicle_control::topics::kVehicleControl, 10);
 
         // Timer to run the scenario logic at 10 Hz
         scenario_timer_ = this->create_wall_timer(
@@ -119,7 +120,7 @@ private:
         control_msg.steering = steering;
         control_publisher_->publish(control_msg);
 
-        RCLCPP_INFO(this->get_logger(),
+        RCLCPP_DEBUG(this->get_logger(),
             "Time: %.1fs | Phase: %s | Steer: %s | Speed: %.2f | T: %.2f | B: %.2f | S: %.2f",
             elapsed, scenario_phase_.c_str(), steering_phase_.c_str(),
             current_speed_, throttle, brake, steering);

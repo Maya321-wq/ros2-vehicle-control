@@ -3,7 +3,9 @@
 #include <memory>
 
 #include "rclcpp/rclcpp.hpp"
-#include "std_msgs/msg/float32_multi_array.hpp"
+#include "vehicle_control/topics.hpp"
+#include "vehicle_control/msg/vehicle_state.hpp"
+#include "vehicle_control/msg/vehicle_control.hpp"
 
 using std::placeholders::_1;
 
@@ -17,17 +19,17 @@ public:
         this->declare_parameter<double>("target_speed", 30.0);
         target_speed_kmh_ = this->get_parameter("target_speed").as_double();
 
-        // Subscribe to the full vehicle state (not just speed)
+        // Subscribe to the same typed vehicle state used by the simulator.
         state_subscription_ =
-            this->create_subscription<std_msgs::msg::Float32MultiArray>(
-                "/vehicle_state",
+            this->create_subscription<vehicle_control::msg::VehicleState>(
+                vehicle_control::topics::kVehicleState,
                 10,
                 std::bind(&SpeedController::state_callback, this, _1));
 
         // Publish control commands
         control_publisher_ =
-            this->create_publisher<std_msgs::msg::Float32MultiArray>(
-                "/vehicle_control", 10);
+            this->create_publisher<vehicle_control::msg::VehicleControl>(
+                vehicle_control::topics::kVehicleControl, 10);
 
         RCLCPP_INFO(
             this->get_logger(),
@@ -37,15 +39,9 @@ public:
 
 private:
     void state_callback(
-        const std_msgs::msg::Float32MultiArray::SharedPtr msg)
+        const vehicle_control::msg::VehicleState::SharedPtr msg)
     {
-        if (msg->data.size() < 1) {
-            RCLCPP_WARN(this->get_logger(), "State message must contain at least 1 value.");
-            return;
-        }
-
-        // Extract speed from the first element of the state array
-        const double current_speed_kmh = msg->data[0];
+        const double current_speed_kmh = msg->speed;
         const double error = target_speed_kmh_ - current_speed_kmh;
 
         float throttle = 0.0f;
@@ -61,11 +57,13 @@ private:
                 std::clamp(0.08 * (-error), 0.0, 0.5));
         }
 
-        std_msgs::msg::Float32MultiArray control_message;
-        control_message.data = {throttle, brake, steering};
+        vehicle_control::msg::VehicleControl control_message;
+        control_message.throttle = throttle;
+        control_message.brake = brake;
+        control_message.steering = steering;
         control_publisher_->publish(control_message);
 
-        RCLCPP_INFO(
+        RCLCPP_DEBUG(
             this->get_logger(),
             "Current: %.2f km/h | Target: %.2f | Error: %.2f | Throttle: %.2f | Brake: %.2f",
             current_speed_kmh,
@@ -77,8 +75,8 @@ private:
 
     double target_speed_kmh_;
 
-    rclcpp::Subscription<std_msgs::msg::Float32MultiArray>::SharedPtr state_subscription_;
-    rclcpp::Publisher<std_msgs::msg::Float32MultiArray>::SharedPtr control_publisher_;
+    rclcpp::Subscription<vehicle_control::msg::VehicleState>::SharedPtr state_subscription_;
+    rclcpp::Publisher<vehicle_control::msg::VehicleControl>::SharedPtr control_publisher_;
 };
 
 int main(int argc, char * argv[])

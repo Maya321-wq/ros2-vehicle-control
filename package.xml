@@ -2,7 +2,7 @@
 <package format="3">
   <name>vehicle_control</name>
   <version>0.0.0</version>
-  <description>ROS 2 vehicle simulation and speed control exercise</description>
+  <description>ROS 2 vehicle simulation, scenario control, logging, and visualization demo</description>
   <maintainer email="maya@example.com">Maya</maintainer>
   <license>Apache-2.0</license>
 
@@ -10,11 +10,16 @@
   <buildtool_depend>rosidl_default_generators</buildtool_depend>
 
   <depend>rclcpp</depend>
-  <depend>std_msgs</depend>
   <depend>visualization_msgs</depend>
   <depend>geometry_msgs</depend>
-  
+
+  <exec_depend>launch</exec_depend>
+  <exec_depend>launch_ros</exec_depend>
+  <exec_depend>ament_index_python</exec_depend>
+  <exec_depend>rclpy</exec_depend>
   <exec_depend>rosidl_default_runtime</exec_depend>
+  <exec_depend>python3-matplotlib</exec_depend>
+  <exec_depend>rviz2</exec_depend>
 
   <member_of_group>rosidl_interface_packages</member_of_group>
 

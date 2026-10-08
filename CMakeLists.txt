@@ -1,5 +1,9 @@
-cmake_minimum_required(VERSION 3.8)
+cmake_minimum_required(VERSION 3.10)
 project(vehicle_control)
+
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
 
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
@@ -7,61 +11,60 @@ endif()
 
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
-find_package(std_msgs REQUIRED)
 find_package(visualization_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(rosidl_default_generators REQUIRED)
 
-# 1. Generate custom messages
+# Generate the package's public ROS interfaces.
 rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/VehicleState.msg"
   "msg/VehicleControl.msg"
-  DEPENDENCIES std_msgs
+  "msg/ScenarioState.msg"
 )
 
-# 2. Executable 1: Vehicle Simulator
-add_executable(vehicle_simulator src/vehicle_simulator.cpp)
-target_link_libraries(vehicle_simulator rclcpp::rclcpp std_msgs::std_msgs)
-add_dependencies(vehicle_simulator ${PROJECT_NAME})
-target_link_libraries(vehicle_simulator ${PROJECT_NAME}__rosidl_typesupport_cpp)
+# Keep the common build setup in one place so adding a node stays mechanical.
+function(add_vehicle_node target source)
+  add_executable(${target} ${source})
+  target_include_directories(${target} PRIVATE include)
+  target_link_libraries(
+    ${target}
+    rclcpp::rclcpp
+    ${PROJECT_NAME}__rosidl_typesupport_cpp
+  )
+  add_dependencies(${target} ${PROJECT_NAME})
+endfunction()
 
-# 3. Executable 2: Speed Controller
-add_executable(speed_controller src/speed_controller.cpp)
-target_link_libraries(speed_controller rclcpp::rclcpp std_msgs::std_msgs)
-add_dependencies(speed_controller ${PROJECT_NAME})
-target_link_libraries(speed_controller ${PROJECT_NAME}__rosidl_typesupport_cpp)
+add_vehicle_node(vehicle_simulator src/nodes/simulation/vehicle_simulator.cpp)
+add_vehicle_node(speed_controller src/nodes/control/speed_controller.cpp)
+add_vehicle_node(scenario_controller src/nodes/control/scenario_controller.cpp)
+add_vehicle_node(
+  advanced_scenario_controller
+  src/nodes/control/advanced_scenario_controller.cpp
+)
+add_vehicle_node(auto_scenario_manager src/nodes/scenario/auto_scenario_manager.cpp)
+add_vehicle_node(experiment_logger src/nodes/observability/experiment_logger.cpp)
+add_vehicle_node(visualizer src/nodes/visualization/visualizer.cpp)
+target_link_libraries(
+  visualizer
+  visualization_msgs::visualization_msgs
+  geometry_msgs::geometry_msgs
+)
 
-# 4. Executable 3: Scenario Controller
-add_executable(scenario_controller src/scenario_controller.cpp)
-target_link_libraries(scenario_controller rclcpp::rclcpp std_msgs::std_msgs)
-add_dependencies(scenario_controller ${PROJECT_NAME})
-target_link_libraries(scenario_controller ${PROJECT_NAME}__rosidl_typesupport_cpp)
-
-# 5. Executable 4: Advanced Scenario Controller
-add_executable(advanced_scenario_controller src/advanced_scenario_controller.cpp)
-target_link_libraries(advanced_scenario_controller rclcpp::rclcpp std_msgs::std_msgs)
-add_dependencies(advanced_scenario_controller ${PROJECT_NAME})
-target_link_libraries(advanced_scenario_controller ${PROJECT_NAME}__rosidl_typesupport_cpp)
-
-# 6. Executable 5: Visualizer (for RViz2)
-add_executable(visualizer src/visualizer.cpp)
-target_link_libraries(visualizer rclcpp::rclcpp visualization_msgs::visualization_msgs geometry_msgs::geometry_msgs)
-add_dependencies(visualizer ${PROJECT_NAME})
-target_link_libraries(visualizer ${PROJECT_NAME}__rosidl_typesupport_cpp)
-
-# 7. Install all executables
 install(TARGETS
   vehicle_simulator
   speed_controller
   scenario_controller
   advanced_scenario_controller
   visualizer
+  auto_scenario_manager
+  experiment_logger
   DESTINATION lib/${PROJECT_NAME}
 )
 
-# 8. Install the launch directory
+# Keep runtime compositions and settings available after installation.
 install(DIRECTORY
   launch
+  config
   DESTINATION share/${PROJECT_NAME}
 )
 

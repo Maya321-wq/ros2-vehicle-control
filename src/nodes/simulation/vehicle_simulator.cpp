@@ -4,6 +4,7 @@
 #include <memory>
 
 #include "rclcpp/rclcpp.hpp"
+#include "vehicle_control/topics.hpp"
 #include "vehicle_control/msg/vehicle_state.hpp"
 #include "vehicle_control/msg/vehicle_control.hpp"
 
@@ -25,12 +26,12 @@ public:
         // Publish the full vehicle state using custom message
         state_publisher_ =
             this->create_publisher<vehicle_control::msg::VehicleState>(
-                "/vehicle_state", 10);
+                vehicle_control::topics::kVehicleState, 10);
 
         // Receive control commands using custom message (FIXED!)
         control_subscription_ =
             this->create_subscription<vehicle_control::msg::VehicleControl>(
-                "/vehicle_control",
+                vehicle_control::topics::kVehicleControl,
                 10,
                 std::bind(&VehicleSimulator::control_callback, this, _1));
 
@@ -39,7 +40,7 @@ public:
             std::chrono::milliseconds(100),
             std::bind(&VehicleSimulator::update_vehicle, this));
 
-        RCLCPP_INFO(
+        RCLCPP_DEBUG(
             this->get_logger(),
             "Vehicle Simulator started. Initial state: speed=0, pos=(0,0), yaw=0");
     }
@@ -91,7 +92,7 @@ private:
 
         state_publisher_->publish(state_message);
 
-        RCLCPP_INFO(
+        RCLCPP_DEBUG(
             this->get_logger(),
             "Speed: %.2f km/h | Pos: (%.2f, %.2f) m | Yaw: %.2f rad | Steer: %.2f",
             speed_kmh_, position_x_, position_y_, yaw_, steering_);

@@ -1,7 +1,14 @@
 from launch import LaunchDescription
+from ament_index_python.packages import get_package_share_directory
 from launch_ros.actions import Node
+import os
 
 def generate_launch_description():
+    controller_parameters = os.path.join(
+        get_package_share_directory('vehicle_control'),
+        'config',
+        'controller.yaml',
+    )
     return LaunchDescription([
         
         # Vehicle Simulator
@@ -11,6 +18,14 @@ def generate_launch_description():
             name='vehicle_simulator',
             output='screen'
         ),
+
+        # Automatically publish scenario events for the advanced controller
+        Node(
+            package='vehicle_control',
+            executable='auto_scenario_manager',
+            name='auto_scenario_manager',
+            output='screen'
+        ),
         
         # Advanced Scenario Controller
         Node(
@@ -18,13 +33,7 @@ def generate_launch_description():
             executable='advanced_scenario_controller',
             name='advanced_scenario_controller',
             output='screen',
-            parameters=[
-                {'target_speed': 30.0},
-                {'yellow_speed': 15.0},
-                {'kp_throttle': 0.04},
-                {'kp_brake': 0.08},
-                {'emergency_brake_value': 1.0}
-            ]
+            parameters=[controller_parameters]
         ),
         
         # Visualizer (converts vehicle state to RViz markers)

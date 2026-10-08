@@ -1,0 +1,7 @@
+advanced_scenario_controller:
+  ros__parameters:
+    target_speed: 30.0
+    yellow_speed: 15.0
+    kp_throttle: 0.04
+    kp_brake: 0.08
+    emergency_brake_value: 1.0
