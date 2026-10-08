@@ -1,8 +1,7 @@
 # Vehicle Control (ROS 2)
 
 A ROS 2 demo of a simulated vehicle, controllers, scripted scenarios, CSV
-logging, and Matplotlib plots. This is a simple teaching simulation, not
-software for controlling a real vehicle.
+logging, and Matplotlib plots.
 
 ## Project structure
 
